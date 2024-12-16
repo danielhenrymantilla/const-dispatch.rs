@@ -41,18 +41,18 @@ fn __(
 {
     let to_be_braced = Iterator::chain(
         tts![
-            Punct::new('#', proc_macro::Spacing::Alone),
+            Punct::new('#', Spacing::Alone),
             Group::new(
                 Delimiter::Bracket,
                 tts![
-                    Punct::new(':', proc_macro::Spacing::Joint),
-                    Punct::new(':', proc_macro::Spacing::Alone),
+                    Punct::new(':', Spacing::Joint),
+                    Punct::new(':', Spacing::Alone),
                     Ident::new("const_dispatch", Span::mixed_site()),
-                    Punct::new(':', proc_macro::Spacing::Joint),
-                    Punct::new(':', proc_macro::Spacing::Alone),
+                    Punct::new(':', Spacing::Joint),
+                    Punct::new(':', Spacing::Alone),
                     Ident::new("ඞ", Span::mixed_site()),
-                    Punct::new(':', proc_macro::Spacing::Joint),
-                    Punct::new(':', proc_macro::Spacing::Alone),
+                    Punct::new(':', Spacing::Joint),
+                    Punct::new(':', Spacing::Alone),
                     Ident::new("exterminate", Span::mixed_site()),
                 ]
             )
@@ -62,16 +62,16 @@ fn __(
         input,
     );
     tts![
-        Punct::new(':', proc_macro::Spacing::Joint),
-        Punct::new(':', proc_macro::Spacing::Alone),
+        Punct::new(':', Spacing::Joint),
+        Punct::new(':', Spacing::Alone),
         Ident::new("const_dispatch", Span::mixed_site()),
-        Punct::new(':', proc_macro::Spacing::Joint),
-        Punct::new(':', proc_macro::Spacing::Alone),
+        Punct::new(':', Spacing::Joint),
+        Punct::new(':', Spacing::Alone),
         Ident::new("ඞ", Span::mixed_site()),
-        Punct::new(':', proc_macro::Spacing::Joint),
-        Punct::new(':', proc_macro::Spacing::Alone),
+        Punct::new(':', Spacing::Joint),
+        Punct::new(':', Spacing::Alone),
         Ident::new("derive_ConstDispatch", Span::mixed_site()),
-        Punct::new('!', proc_macro::Spacing::Alone),
+        Punct::new('!', Spacing::Alone),
         Group::new(Delimiter::Brace, to_be_braced.collect()),
     ]
 }
@@ -179,14 +179,14 @@ fn ඞtry_hide(
         ident,
         Punct::new(':', Spacing::Alone),
 
-        Punct::new(':', proc_macro::Spacing::Joint),
-        Punct::new(':', proc_macro::Spacing::Alone),
+        Punct::new(':', Spacing::Joint),
+        Punct::new(':', Spacing::Alone),
         Ident::new("const_dispatch", Span::mixed_site()),
-        Punct::new(':', proc_macro::Spacing::Joint),
-        Punct::new(':', proc_macro::Spacing::Alone),
+        Punct::new(':', Spacing::Joint),
+        Punct::new(':', Spacing::Alone),
         Ident::new("ඞ", Span::mixed_site()),
-        Punct::new(':', proc_macro::Spacing::Joint),
-        Punct::new(':', proc_macro::Spacing::Alone),
+        Punct::new(':', Spacing::Joint),
+        Punct::new(':', Spacing::Alone),
         Ident::new("Never", Span::mixed_site()),
 
         Punct::new(';', Spacing::Alone),
