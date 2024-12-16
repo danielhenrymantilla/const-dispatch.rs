@@ -4,15 +4,22 @@ version = 3
 
 [[package]]
 name = "const-dispatch"
-version = "0.1.0-rc1"
+version = "0.1.0"
 dependencies = [
  "const-dispatch-proc_macros",
+ "never-say-never",
  "paste",
 ]
 
 [[package]]
 name = "const-dispatch-proc_macros"
-version = "0.1.0-rc1"
+version = "0.1.0"
+
+[[package]]
+name = "never-say-never"
+version = "6.6.666"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf5a574dadd7941adeaa71823ecba5e28331b8313fb2e1c6a5c7e5981ea53ad6"
 
 [[package]]
 name = "paste"

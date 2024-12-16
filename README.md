@@ -18,3 +18,7 @@ https://github.com/danielhenrymantilla/const-dispatch.rs/actions)
 https://github.com/rust-secure-code/safety-dance/)
 
 <!-- Templated by `cargo-generate` using https://github.com/danielhenrymantilla/proc-macro-template -->
+
+See the docs of [`const_dispatch!`] for more info.
+
+[`const_dispatch!`]: https://docs.rs/const-dispatch/latest/const_dispatch/macro.const_dispatch.html

@@ -52,7 +52,10 @@ macro_rules! ඞderive_ConstDispatch {(
                     $(
                         | $EnumName::$Variant => {
                             const $C: $EnumName = $EnumName::$Variant;
-                            $body
+                            {
+                                $crate::ඞ::try_hide!($scrutinee);
+                                $body
+                            }
                         },
                     )*
                 }
@@ -66,6 +69,7 @@ macro_rules! ඞderive_ConstDispatch {(
                 match $scrutinee {
                     $(
                         | $EnumName::$Variant => {
+                            $crate::ඞ::try_hide!($scrutinee);
                             __emit__! { $Variant }
                         },
                     )*

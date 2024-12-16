@@ -1,3 +1,4 @@
+//! [`const_dispatch!`]: const_dispatch!
 #![doc = include_str!("../README.md")]
 #![no_std]
 #![forbid(unsafe_code)]
@@ -30,12 +31,14 @@ pub use ::const_dispatch_proc_macros::ConstDispatch;
 ///
 /// It is not to be implemented manually: only through its eponymous
 /// <code>#\[[derive]\([ConstDispatch][macro@ConstDispatch]\)\]</code>.
+///
+/// [derive]: [macro@derive]
 #[diagnostic::on_unimplemented(
     note = "the `enum` definition is missing a `#[derive(ConstDispatch)]`",
 )]
 pub trait ConstDispatch : ඞ::MacroDerived {}
 
-mod const_dispatch;
+mod const_dispatch_macro;
 
 mod derive;
 
@@ -48,8 +51,10 @@ mod ඞ {
     pub use crate::ඞderive_ConstDispatch as derive_ConstDispatch;
 
     pub use ::const_dispatch_proc_macros::ඞexterminate as exterminate;
+    pub use ::const_dispatch_proc_macros::ඞtry_hide as try_hide;
 
     pub use ::paste::paste;
+    pub use ::never_say_never::Never;
 
     pub trait MacroDerived {}
     impl<T : ?Sized> ConstDispatch for T where Self : MacroDerived {}
