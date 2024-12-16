@@ -50,8 +50,10 @@ mod ඞ {
     pub use crate::ඞderive_ConstDispatch as derive_ConstDispatch;
 
     pub use ::const_dispatch_proc_macros::ඞexterminate as exterminate;
+    pub use ::const_dispatch_proc_macros::ඞtry_hide as try_hide;
 
     pub use ::paste::paste;
+    pub use ::never_say_never::Never;
 
     pub trait MacroDerived {}
     impl<T : ?Sized> ConstDispatch for T where Self : MacroDerived {}

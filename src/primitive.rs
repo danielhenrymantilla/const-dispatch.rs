@@ -38,11 +38,17 @@ macro_rules! bool {
         match $scrutinee {
             | true => {
                 const $C: ::core::primitive::bool = true;
-                $body
+                {
+                    $crate::ඞ::try_hide!($scrutinee);
+                    $body
+                }
             },
             | false => {
                 const $C: ::core::primitive::bool = false;
-                $body
+                {
+                    $crate::ඞ::try_hide!($scrutinee);
+                    $body
+                }
             },
         }
     );
@@ -54,11 +60,13 @@ macro_rules! bool {
         macro_rules! __emit__ { $macro_input => $macro_output }
         match $scrutinee {
             | true => {
+                $crate::ඞ::try_hide!($scrutinee);
                 emit! {
                     true
                 }
             },
             | false => {
+                $crate::ඞ::try_hide!($scrutinee);
                 emit! {
                     false
                 }
