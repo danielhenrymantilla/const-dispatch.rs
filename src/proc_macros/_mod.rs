@@ -88,7 +88,7 @@ fn ඞimpl_for_u8(
         (0..=u8::MAX)
             .map(|n| format!(r#"
                 {n}_u8 => {{
-                    const $C: ::core::primitive::u8 = $n;
+                    const $C: ::core::primitive::u8 = {n};
                     {{
                         $crate::ඞ::try_hide!($scrutinee);
                         $body
@@ -102,7 +102,7 @@ fn ඞimpl_for_u8(
             .map(|n| format!(r#"
                 {n}_u8 => {{
                     $crate::ඞ::try_hide!($scrutinee);
-                    __emit__! {{ $n }}
+                    __emit__! {{ {n} }}
                 }},
             "#))
             .collect::<String>()
