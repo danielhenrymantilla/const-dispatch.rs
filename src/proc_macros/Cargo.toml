@@ -1,0 +1,21 @@
+# Templated by `cargo-generate` using https://github.com/danielhenrymantilla/proc-macro-template
+[lib]
+proc-macro = true
+path = "_mod.rs"
+
+[package]
+name = "const-dispatch-proc_macros"
+authors = [
+    "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>"
+]
+version = "0.1.0-rc1"  # Keep in sync
+edition = "2021"
+rust-version = "1.79.0"
+
+license = "Zlib OR MIT OR Apache-2.0"
+repository = "https://github.com/danielhenrymantilla/const-dispatch.rs"
+documentation = "https://docs.rs/const-dispatch"
+
+description = "Internal: proc-macro backend of ::const_dispatch."
+
+[dependencies]
