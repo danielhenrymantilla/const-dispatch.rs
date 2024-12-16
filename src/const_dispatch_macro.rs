@@ -23,15 +23,37 @@ use super::*;
 /// # "##;
 /// ```
 ///
-/// ## Examples
-///
-/// ### [`const_dispatch!`] and [`bool`]:
+/// Call-site example:
 ///
 /// ```rust
-/// use ::const_dispatch::{
-///     const_dispatch,
-///     primitive::bool, // <- or `prelude::*`
-/// };
+/// # r#"
+/// const_dispatch!(scrutinee, |const VALUE: ItsType| {
+///     … VALUE …
+/// })
+/// # "#;
+/// ```
+///
+///   - ### More advanced usage: the "macro callback" API
+///
+///     ```rust
+///     # r#"
+///     const_dispatch!(scrutinee, ItsType, |$Value:tt| {
+///         … $Value …
+///     })
+///     # "#;
+///     ```
+///
+///       - (`:ident` for <code>#\[derive\([ConstDispatch][macro@ConstDispatch]\)\] enum</code>s,
+///         `:literal` for the [`primitive`]s)
+///
+///     For more details, see [the example](#the-type-level-enum-pattern).
+///
+/// ## Examples
+///
+/// ### [`const_dispatch!`] and [`bool`][prim@bool]:
+///
+/// ```rust
+/// use ::const_dispatch::prelude::*;
 ///
 /// fn inner<const VERBOSE: bool>() {
 ///     // ...
@@ -70,6 +92,12 @@ use super::*;
 /// Imagine having:
 ///
 /// ```rust
+/// #[derive(Debug, PartialEq, Eq)]
+/// pub enum BinOp {
+///     Add,
+///     Xor,
+/// }
+///
 /// pub fn some_function(b: BinOp, name: &str) {
 ///     match b {
 ///         BinOp::Add => { /* some logic */ },
@@ -85,12 +113,6 @@ use super::*;
 ///         }
 ///     }
 /// }
-///
-/// #[derive(Debug, PartialEq, Eq)]
-/// pub enum BinOp {
-///     Add,
-///     Xor,
-/// }
 /// ```
 ///
 /// This is technically risking to be branching a bunch of times over the value of `b`.
@@ -99,55 +121,104 @@ use super::*;
 ///
 /// Now, consider instead doing the following simpler transformation:
 ///
-/// ```rust ,ignore
-/// #![feature(adt_const_params)]
-///
+/// ```rust
 /// // 0. Use this crate!
 /// use ::const_dispatch::{const_dispatch, ConstDispatch};
 ///
-/// // 1. Make the function "a private helper", and generic over `BinOp`:
-/// fn some_function_generic<const B: BinOp>(name: &str) {
-///     match B {
-///         BinOp::Add => { /* some logic */ },
-///         BinOp::Xor => { /* some other logic */ },
-///     }
-///
-///     // some common logic
-///
-///     /* some */ loop {
-///         match B {
-///             BinOp::Add => { /* some more logic */ },
-///             BinOp::Xor => { /* some more other logic */ },
-///         }
-///     }
-/// }
-/// // This should be easy to do for the developer; and it should be trivial
-/// // for the compiler to elide these branches, since `B` is now `const`.
-///
-/// // 2. Re-define a "`pub`lic frontend" function
-/// pub fn some_function(b: BinOp, name: &str) {
-///     // This works because `BinOp : ConstDispatch`
-///     const_dispatch!(b, |const B: BinOp| {
-///         some_function_generic::<B>(name)
-///     })
-/// }
-///
-/// // 3. Make sure `BinOp : ConstDispatch`
+/// // 1. Make sure `BinOp : ConstDispatch`
 /// //                             vvvvvvvvvvvvv
 /// #[derive(Debug, PartialEq, Eq, ConstDispatch)]
-/// # #[derive(::core::marker::ConstParamTy)]
 /// pub enum BinOp {
 ///     Add,
 ///     Xor,
 /// }
+///
+/// // 2. use `const_dispatch!` at the beginning of your function
+/// pub fn some_function(b: BinOp, name: &str) {
+///     // This works because `BinOp : ConstDispatch`
+///     const_dispatch!(b, |const B: BinOp| {
+///         // 3. adjust your code to be (const-)matching over the `const B`
+///         //    to ensure the branches get optimized out! 🔥
+///         match B {
+///             BinOp::Add => { /* some logic */ },
+///             BinOp::Xor => { /* some other logic */ },
+///         }
+///
+///         // some common logic
+///
+///         /* some */ loop {
+///             match B {
+///                 BinOp::Add => { /* some more logic */ },
+///                 BinOp::Xor => { /* some more other logic */ },
+///             }
+///         }
+///     })
+/// }
 /// ```
 ///
-/// > Wait, `<const B: BinOp>` is not a thing in stable Rust!
+/// This should be easy to do for the developer; and it should be trivial
+/// for the compiler to elide these branches, since `B` is now `const`.
 ///
-/// True, but you get the idea. On stable rust, for simple things, using a
-/// `<const IS_BINOP_ADD: bool>` generic instead is probably the simplest.
+///   - Remains, however, the risk to be naming the runtime `b` in this scenario, so prefixing
+///     the snippet with `let b = ();` to prevent that might be advisable.
 ///
-/// Otherwise, you could use the type-level `enum` pattern:
+///     The other, ideally cleaner, option, would be to factor out the inner body within a helper
+///     function:
+///
+///     ```rust ,ignore
+///     #![feature(adt_const_params)]
+///
+///     // 0. Use this crate!
+///     use ::const_dispatch::{const_dispatch, ConstDispatch};
+///
+///     // 1. Make sure `BinOp : ConstDispatch`
+///     //                             vvvvvvvvvvvvv
+///     #[derive(Debug, PartialEq, Eq, ConstDispatch)]
+///     # #[derive(::core::marker::ConstParamTy)]
+///     pub enum BinOp {
+///         Add,
+///         Xor,
+///     }
+///
+///     // 2. use `const_dispatch!` at the beginning of your function
+///     pub fn some_function(b: BinOp, name: &str) {
+///         // This works because `BinOp : ConstDispatch`
+///         const_dispatch!(b, |const B: BinOp| {
+///             // 2.1 but delegate to a new helper generic function.
+///             some_function_generic::<B>(name)
+///         })
+///     }
+///
+///     // 3. Define the "private helper" *generic over `BinOp`* function.
+///     fn some_function_generic<const B: BinOp>(name: &str) {
+///         match B {
+///             BinOp::Add => { /* some logic */ },
+///             BinOp::Xor => { /* some other logic */ },
+///         }
+///
+///         // some common logic
+///
+///         /* some */ loop {
+///             match B {
+///                 BinOp::Add => { /* some more logic */ },
+///                 BinOp::Xor => { /* some more other logic */ },
+///             }
+///         }
+///     }
+///     ```
+///
+///     > _Wait, `<const B: BinOp>` is not a thing in stable Rust!_
+///
+/// True, but you get the idea.
+///
+/// On stable rust, for simple things, **using a `<const IS_BINOP_ADD: bool>` generic** instead is
+/// probably the simplest.
+///
+/// Otherwise (_e.g._ let's say `BinOp` has 4 > 2 variants), you could use:
+///
+/// ### the type-level `enum` pattern
+///
+/// <details class="custom" open><summary><span class="summary-box"><span>Click to hide</span></span></summary>
 ///
 /// ```rust
 /// use ::const_dispatch::{const_dispatch, ConstDispatch};
@@ -162,11 +233,11 @@ use super::*;
 ///
 /// // 1. Define some "type-level" `enum` and variants
 /// //    (a helper macro could make this a breeze)
-/// trait IsBinOp { const VALUE: BinOp; }
-///     enum Add {} impl IsBinOp for Add { const VALUE: BinOp = BinOp::Add; }
-///     enum Xor {} impl IsBinOp for Xor { const VALUE: BinOp = BinOp::Xor; }
-///     enum Sub {} impl IsBinOp for Sub { const VALUE: BinOp = BinOp::Sub; }
-///     enum Mul {} impl IsBinOp for Mul { const VALUE: BinOp = BinOp::Mul; }
+/// trait IsBinOp { const VAL: BinOp; }
+///     enum Add {} impl IsBinOp for Add { const VAL: BinOp = BinOp::Add; }
+///     enum Xor {} impl IsBinOp for Xor { const VAL: BinOp = BinOp::Xor; }
+///     enum Sub {} impl IsBinOp for Sub { const VAL: BinOp = BinOp::Sub; }
+///     enum Mul {} impl IsBinOp for Mul { const VAL: BinOp = BinOp::Mul; }
 ///
 /// // 2. Thanks to `const_dispatch!`, dispatch to these
 /// //    (using the more advanced "macro rule" API).
@@ -178,7 +249,7 @@ use super::*;
 ///
 /// // 3. Profit!
 /// fn some_function_generic<B: IsBinOp>(name: &str) {
-///     match B::VALUE {
+///     match B::VAL {
 ///         BinOp::Add => { /* some logic */ },
 ///         BinOp::Xor => { /* some other logic */ },
 ///         BinOp::Mul => { /* … */ },
@@ -189,7 +260,7 @@ use super::*;
 ///
 ///     /* some */ loop {
 ///         # break;
-///         match B::VALUE {
+///         match B::VAL {
 ///             BinOp::Add => { /* some logic */ },
 ///             BinOp::Xor => { /* some other logic */ },
 ///             BinOp::Mul => { /* … */ },
@@ -200,6 +271,8 @@ use super::*;
 ///
 /// # fn main() { some_function(BinOp::Add, ""); }
 /// ```
+///
+/// </details>
 #[macro_export]
 macro_rules! const_dispatch {
     (
