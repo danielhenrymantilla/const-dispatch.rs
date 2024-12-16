@@ -118,6 +118,7 @@ fn ඞimpl_for_u8(
                 $scrutinee:expr,
                 $macro_input:tt => $macro_output:tt
             ) => ({{
+                macro_rules! __emit__ {{ $macro_input => $macro_output }}
                 match $scrutinee {{
                     {branches_macro}
                 }}
